@@ -1,0 +1,97 @@
+createOrReplace
+    table Calendar
+        lineageTag: 3984c24d-ea4e-4741-8685-c8c1b917b9cc
+
+        column Date
+            formatString: General Date
+            lineageTag: a1dbc3cf-c187-4c92-910c-8d706785fd4e
+            summarizeBy: none
+            sourceColumn: [Date]
+
+        column Year
+            formatString: 0
+            sourceColumn: [Year]
+
+        column YearNumber
+            formatString: 0
+            sourceColumn: [YearNumber]
+
+        column QuarterOfYear
+            formatString: 0
+            sourceColumn: [QuarterOfYear]
+
+        column MonthOfYear
+            formatString: 0
+            sourceColumn: [MonthOfYear]
+
+        column DayOfMonth
+            formatString: 0
+            sourceColumn: [DayOfMonth]
+
+        column DateInt
+            formatString: 0
+            sourceColumn: [DateInt]
+
+        column MonthName
+            sourceColumn: [MonthName]
+
+        column MonthInCalendar
+            sourceColumn: [MonthInCalendar]
+
+        column QuarterInCalendar
+            sourceColumn: [QuarterInCalendar]
+
+        column DayInWeek
+            formatString: 0
+            sourceColumn: [DayInWeek]
+
+        column DayOfWeekName
+            sourceColumn: [DayOfWeekName]
+
+        column WeekNumber
+            formatString: 0
+            sourceColumn: [Week Number]
+
+        column MonthnYear
+            formatString: 0
+            sourceColumn: [MonthnYear]
+
+        column QuarternYear
+            formatString: 0
+            sourceColumn: [QuarternYear]
+
+        column ShortYear
+            sourceColumn: [ShortYear]
+
+        column FY
+            sourceColumn: [FY]
+
+        partition Calendar = calculated
+            mode: import
+            source = ```
+                VAR StartDate = DATE(2025,1,1)
+                VAR EndDate = DATE(2025,12,31)
+                VAR FYStartMonth = 4
+                VAR Dates = CALENDAR(StartDate, EndDate)
+
+                RETURN
+                ADDCOLUMNS(
+                    Dates,
+                    "Year", FORMAT([Date], "yyyy"),
+                    "YearNumber", YEAR([Date]),
+                    "QuarterOfYear", QUARTER([Date]),
+                    "MonthOfYear", MONTH([Date]),
+                    "DayOfMonth", DAY([Date]),
+                    "DateInt", YEAR([Date]) * 10000 + MONTH([Date]) * 100 + DAY([Date]),
+                    "MonthName", FORMAT([Date], "MMMM"),
+                    "MonthInCalendar", FORMAT([Date], "MMM") & " " & FORMAT([Date], "yyyy"),
+                    "QuarterInCalendar", "Q" & QUARTER([Date]) & " " & FORMAT([Date], "yyyy"),
+                    "DayInWeek", WEEKDAY([Date], 1) - 1,
+                    "DayOfWeekName", FORMAT([Date], "dddd"),
+                    "Week Number", WEEKNUM([Date], 2),
+                    "MonthnYear", YEAR([Date]) * 10000 + MONTH([Date]) * 100,
+                    "QuarternYear", YEAR([Date]) * 10000 + QUARTER([Date]) * 100,
+                    "ShortYear", RIGHT(YEAR([Date]), 2),
+                    "FY", "FY" & IF(MONTH([Date]) >= FYStartMonth, RIGHT(YEAR([Date]) + 1, 2), RIGHT(YEAR([Date]), 2))
+                )
+            ```
